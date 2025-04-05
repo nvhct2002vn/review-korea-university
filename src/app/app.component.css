@@ -3,6 +3,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  input,
+  select,
+  textarea {
+    color: #000; /* màu đen */
+  }
+
 }
 
 body {
@@ -151,15 +157,15 @@ body {
     flex-direction: column;
     gap: 15px;
   }
-  
+
   .main-nav ul {
     justify-content: center;
   }
-  
+
   .main-nav li {
     margin: 0 15px;
   }
-  
+
   .footer-content {
     flex-direction: column;
     gap: 30px;

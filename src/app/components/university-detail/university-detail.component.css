@@ -1,5 +1,5 @@
 .university-detail-container {
-  max-width: 1200px;
+  width: 1024px;
   margin: 0 auto;
   padding: 20px;
   font-family: 'Arial', sans-serif;
@@ -86,6 +86,21 @@
 
 .star.filled {
   color: #ffc107;
+}
+
+.star.half-filled {
+  position: relative;
+  color: #d4d4d4;
+  font-size: 1.2rem;
+  overflow: hidden;
+}
+
+.star.half-filled::before {
+  content: "★";
+  position: absolute;
+  color: #ffc107;
+  width: 50%;
+  overflow: hidden;
 }
 
 .image-gallery {
@@ -347,10 +362,74 @@
   margin: 0;
 }
 
+.error-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  width: 100%;
+}
+
 .error-message {
-  color: #d9534f;
-  font-size: 0.9rem;
-  margin-top: 5px;
+  background-color: #fff8f8;
+  border: 1px solid #f5c6cb;
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  max-width: 500px;
+  animation: fadeIn 0.5s;
+}
+
+.error-icon {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+.error-message h2 {
+  color: #721c24;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.error-message p {
+  color: #555;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+
+.error-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.error-actions button {
+  background-color: #4a6bff;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  width: 200px;
+}
+
+.error-actions button:hover {
+  background-color: #3857d6;
+}
+
+.back-to-list {
+  color: #4a6bff;
+  text-decoration: none;
+  font-weight: bold;
+  padding: 10px;
+}
+
+.back-to-list:hover {
+  text-decoration: underline;
 }
 
 .submit-btn {
@@ -383,6 +462,7 @@
   background-color: #f9f9f9;
   padding: 25px;
   border-radius: 8px;
+  animation: fadeIn 0.5s;
 }
 
 .review-header {
@@ -489,34 +569,49 @@
   color: #555;
 }
 
+.tuition-info {
+  margin-bottom: 40px;
+}
+
 .tuition-table {
-  margin-bottom: 30px;
+  margin: 20px 0;
+  overflow-x: auto;
 }
 
 .tuition-table table {
   width: 100%;
   border-collapse: collapse;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .tuition-table th,
 .tuition-table td {
   padding: 12px 15px;
+  border: 1px solid #ddd;
   text-align: left;
-  border-bottom: 1px solid #ddd;
 }
 
 .tuition-table th {
   background-color: #f5f5f5;
-  color: #333;
   font-weight: bold;
+  color: #333;
 }
 
 .tuition-note {
-  color: #777;
   font-size: 0.9rem;
+  color: #666;
+  font-style: italic;
 }
 
-/* Facilities Tab */
+.tuition-unavailable,
+.facilities-unavailable {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+  color: #6c757d;
+}
+
 .facilities-info h3 {
   margin-bottom: 15px;
   font-size: 1.5rem;
@@ -527,22 +622,39 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 15px;
+  margin-top: 20px;
 }
 
 .facility-item {
   background-color: #f5f5f5;
   padding: 15px;
-  border-radius: 5px;
+  border-radius: 6px;
+  text-align: center;
   color: #333;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.facilities-unavailable,
-.tuition-unavailable {
-  padding: 30px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  text-align: center;
-  color: #777;
+/* Thêm hiệu ứng hover cho các facility items */
+.facility-item:hover {
+  background-color: #e9ecef;
+  transform: translateY(-2px);
+  transition: all 0.2s ease;
+}
+
+/* Cải thiện responsive */
+@media (max-width: 768px) {
+  .facilities-list {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+
+  .tuition-table {
+    font-size: 0.9rem;
+  }
+
+  .tuition-table th,
+  .tuition-table td {
+    padding: 8px 10px;
+  }
 }
 
 .loading {
@@ -554,26 +666,72 @@
   color: #666;
 }
 
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+  animation: fadeIn 0.5s;
+}
+
 @media (max-width: 768px) {
   .university-stats {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .review-header {
     flex-direction: column;
   }
-  
+
   .review-rating {
     text-align: left;
     margin-top: 10px;
   }
-  
+
   .review-pros-cons {
     flex-direction: column;
   }
-  
+
   .form-row {
     flex-direction: column;
     gap: 0;
   }
-} 
+}
+
+/* Thêm animation cho hiển thị reviews mới */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Thêm một số cải thiện giao diện cho form thông tin phản hồi */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: #4a6bff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(74, 107, 255, 0.25);
+}
+
+.submit-btn {
+  background-color: #4a6bff;
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+  background-color: #3857d6;
+}
+
+.submit-btn:disabled {
+  background-color: #a0adf9;
+  cursor: not-allowed;
+}

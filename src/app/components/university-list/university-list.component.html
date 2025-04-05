@@ -1,112 +1,181 @@
-<!-- Container chính cho trang danh sách trường đại học -->
+<!-- Main container -->
 <div class="university-list-container">
-  <!-- Tiêu đề chính của trang -->
-  <h1>Universities in South Korea</h1>
-  
-  <!-- Phần bộ lọc và tìm kiếm -->
-  <div class="filters">
-    <!-- Ô tìm kiếm -->
+  <!-- Header -->
+  <div class="header">
+    <h1>대학교 탐색하기</h1>
+    <p class="subtitle">한국의 최고 대학교를 찾아보세요</p>
+  </div>
+
+  <!-- Search and filter section -->
+  <div class="search-filter-section">
     <div class="search-box">
-      <!-- 
-        #searchInput: Template reference variable để truy cập element này trong code
-        (input): Event binding - khi người dùng nhập, gọi phương thức onSearchChange với giá trị đã nhập
-      -->
-      <input 
-        type="text" 
-        placeholder="Search universities..." 
-        #searchInput
-        (input)="onSearchChange(searchInput.value)"
+      <input
+        class="search-input"
+        type="text"
+        placeholder="대학교 이름 검색..."
+        [(ngModel)]="searchQuery"
+        (input)="filterUniversities()"
       >
+      <span class="search-icon">🔍</span>
     </div>
-    
-    <!-- Nhóm các bộ lọc dropdown -->
-    <div class="filter-group">
-      <!-- Dropdown lọc theo địa điểm -->
-      <select #locationSelect (change)="onLocationFilterChange(locationSelect.value)">
-        <option value="">All Locations</option>
-        <!-- 
-          @for: Cú pháp vòng lặp trong Angular
-          track: Giúp Angular theo dõi và tối ưu hóa hiệu suất khi danh sách thay đổi
-          getUniqueLocations(): Phương thức từ component trả về danh sách các địa điểm duy nhất
-        -->
-        @for (location of getUniqueLocations(); track location) {
-          <option [value]="location">{{ location }}</option>
-        }
-      </select>
-      
-      <!-- Dropdown lọc theo loại trường -->
-      <select #typeSelect (change)="onTypeFilterChange(typeSelect.value)">
-        <option value="">All Types</option>
-        @for (type of getUniqueTypes(); track type) {
-          <option [value]="type">{{ type }}</option>
-        }
-      </select>
-      
-      <!-- Nút đặt lại các bộ lọc -->
-      <button class="reset-button" (click)="resetFilters()">Reset Filters</button>
+
+    <div class="filter-container">
+      <div class="filter-item">
+        <label for="location-filter">위치</label>
+        <select
+          id="location-filter"
+          class="filter-select"
+          [(ngModel)]="selectedLocation"
+          (change)="filterUniversities()"
+        >
+          <option value="">모든 지역</option>
+          <option *ngFor="let location of locations" [value]="location">{{ location }}</option>
+        </select>
+      </div>
+
+      <div class="filter-item">
+        <label for="type-filter">종류</label>
+        <select
+          id="type-filter"
+          class="filter-select"
+          [(ngModel)]="selectedType"
+          (change)="filterUniversities()"
+        >
+          <option value="">모든 종류</option>
+          <option *ngFor="let type of universityTypes" [value]="type">{{ type }}</option>
+        </select>
+      </div>
+
+      <button
+        *ngIf="searchQuery || selectedLocation || selectedType"
+        class="reset-filters-btn"
+        (click)="resetFilters()"
+      >
+        필터 초기화
+      </button>
     </div>
   </div>
-  
-  <!-- Lưới hiển thị danh sách các trường đại học -->
-  <div class="university-grid">
-    <!-- Vòng lặp qua mảng filteredUniversities để hiển thị từng trường đại học -->
-    @for (university of filteredUniversities; track university.id) {
-      <!-- Card hiển thị thông tin của một trường đại học -->
-      <div class="university-card">
-        <!-- 
-          Hình ảnh của trường 
-          [src]: Property binding - gán giá trị động cho thuộc tính src
-          onerror: Nếu không tải được hình, hiển thị hình mặc định
-        -->
-        <img [src]="university.images[0]" alt="{{ university.name }}" class="university-image" onerror="this.src='assets/images/university-placeholder.jpg'">
-        
-        <!-- Phần thông tin chi tiết của trường -->
-        <div class="university-info">
-          <!-- Tên trường bằng tiếng Anh -->
-          <h2>{{ university.name }}</h2>
-          
-          <!-- Tên trường bằng tiếng Hàn -->
-          <h3 class="korean-name">{{ university.nameKorean }}</h3>
-          
-          <!-- Thông tin meta: địa điểm, loại, năm thành lập -->
-          <div class="university-meta">
-            <span class="location">{{ university.location }}</span>
-            <span class="type">{{ university.type }}</span>
-            <span class="established">Est. {{ university.established }}</span>
+
+  <!-- Loading state -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>대학교 리스트를 불러오는 중...</p>
+  </div>
+
+  <!-- Error state -->
+  <div *ngIf="errorMessage && !loading" class="error-message">
+    <span class="error-icon">⚠️</span>
+    <p>{{ errorMessage }}</p>
+    <button class="retry-btn" (click)="loadUniversities()">다시 시도</button>
+  </div>
+
+  <!-- No results -->
+  <div *ngIf="!loading && !errorMessage && universities.length === 0" class="no-results">
+    <span class="no-results-icon">🔍</span>
+    <h3>검색 결과가 없습니다</h3>
+    <p>다른 검색어 또는 필터를 사용해 보세요.</p>
+  </div>
+
+  <!-- University list without pagination -->
+  <div *ngIf="!loading && !errorMessage && universities.length > 0">
+    <!-- Sort controls -->
+    <div class="sort-container">
+      <div class="sort-controls">
+        <span class="sort-label">정렬:</span>
+        <button
+          class="sort-btn"
+          [class.active]="sortBy === 'name'"
+          (click)="sortUniversities('name')"
+        >
+          이름
+        </button>
+        <button
+          class="sort-btn"
+          [class.active]="sortBy === 'ranking'"
+          (click)="sortUniversities('ranking')"
+        >
+          순위
+        </button>
+        <button
+          class="sort-btn"
+          [class.active]="sortBy === 'rating'"
+          (click)="sortUniversities('rating')"
+        >
+          평점
+        </button>
+        <button
+          class="sort-direction-btn"
+          (click)="toggleSortDirection()"
+        >
+          {{ sortDirection === 'asc' ? '↑' : '↓' }}
+        </button>
+      </div>
+      <div class="results-count">
+        <span>{{ universities.length }}</span> 대학교 찾음
+      </div>
+    </div>
+
+    <!-- Universities grid -->
+    <div class="universities-grid">
+      <div
+        *ngFor="let university of universities"
+        class="university-card"
+        (click)="navigateToDetail(university.id)"
+      >
+        <div class="card-image-container">
+          <div *ngIf="getUniversityImageUrl(university); else universityPlaceholder" class="university-image-container">
+            <img
+              class="university-image"
+              [src]="getUniversityImageUrl(university)"
+              [alt]="university.name + ' 이미지'"
+            >
           </div>
-          
-          <!-- Hiển thị đánh giá dưới dạng số và sao -->
-          <div class="university-rating">
-            <!-- Giá trị đánh giá dạng số -->
-            <span class="rating-value">{{ university.averageRating }}</span>
-            
-            <!-- Hiển thị đánh giá dưới dạng sao -->
-            <div class="rating-stars">
-              <!-- 
-                Vòng lặp qua 5 sao
-                [class.filled]: Class binding có điều kiện - thêm class 'filled' nếu điều kiện là true 
-              -->
-              @for (star of [1, 2, 3, 4, 5]; track star) {
-                <span class="star" [class.filled]="university.averageRating && star <= university.averageRating">★</span>
-              }
+          <ng-template #universityPlaceholder>
+            <div class="university-placeholder">
+              {{ university.name.charAt(0) }}
             </div>
+          </ng-template>
+          <div *ngIf="university.ranking" class="ranking-badge">
+            순위 #{{ university.ranking }}
           </div>
-          
-          <!-- Mô tả ngắn gọn về trường, giới hạn 150 ký tự với pipe slice -->
-          <p class="university-description">{{ university.description | slice:0:150 }}...</p>
-          
-          <!-- Liên kết đến trang chi tiết, sử dụng routerLink với tham số id -->
-          <a [routerLink]="['/universities', university.id]" class="view-details">View Details</a>
+        </div>
+        <div class="card-content">
+          <h3 class="university-name" [title]="university.name">{{ formatUniversityName(university.name) }}</h3>
+          <p *ngIf="university.nameKorean" class="university-korean-name"
+             [title]="university.nameKorean">{{ university.nameKorean }}</p>
+          <div class="university-info">
+            <p *ngIf="university.location" [title]="university.location">
+              <span class="info-icon">📍</span>
+              {{ university.location }}
+            </p>
+            <p *ngIf="university.type" [title]="university.type">
+              <span class="info-icon">🏛️</span>
+              {{ university.type }}
+            </p>
+            <p *ngIf="university.established" [title]="university.established + ' 설립'">
+              <span class="info-icon">📅</span>
+              {{ university.established }} 설립
+            </p>
+          </div>
+
+          <div *ngIf="university.averageRating" class="rating-container">
+            <div class="stars">
+              <span *ngFor="let star of getStars(university.averageRating)"
+                    [class.filled]="star === 'full'"
+                    [class.half-filled]="star === 'half'"
+                    class="star">★</span>
+            </div>
+            <span class="rating-value">{{ university.averageRating | number:'1.1-1' }}</span>
+            <span *ngIf="university.reviewCount" class="review-count">
+              ({{ university.reviewCount }} 리뷰)
+            </span>
+          </div>
+
+          <p *ngIf="university.description" class="university-description" [title]="university.description">
+            {{ truncateDescription(university.description, 75) }}
+          </p>
         </div>
       </div>
-    }
-    
-    <!-- Hiển thị thông báo khi không tìm thấy kết quả nào -->
-    @if (filteredUniversities.length === 0) {
-      <div class="no-results">
-        <p>No universities found matching your criteria.</p>
-        <button (click)="resetFilters()">Reset Filters</button>
-      </div>
-    }
+    </div>
   </div>
-</div> 
+</div>

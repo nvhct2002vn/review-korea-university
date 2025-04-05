@@ -1,64 +1,193 @@
 /* You can add global styles to this file, and also import other style files */
+/* PrimeNG imports that are causing errors - commenting out */
+/* @import "primeng/resources/themes/lara-light-blue/theme.css";*/
+/* @import "primeng/resources/primeng.css";*/
 
-/* Global Styles */
-* {
+/* Ensure dropdowns appear above content - tăng cường z-index và position */
+.p-dropdown-panel, 
+.p-component-overlay {
+  z-index: 100000 !important;
+  position: absolute !important;
+}
+
+/* Override cho PrimeNG */
+.p-dropdown-items-wrapper {
+  z-index: 100001 !important;
+}
+
+.p-dropdown-items {
+  max-height: 200px;
+  overflow-y: auto !important;
+}
+
+body .p-component-overlay {
+  z-index: 9999 !important;
+}
+
+/* Sửa lỗi dropdown bị chìm xuống */
+.p-dropdown .p-dropdown-panel {
+  transform: none !important;
+  top: calc(100% + 5px) !important;
+  left: 0 !important;
+}
+
+/* Đảm bảo dropdown bên dưới footer không bị chìm */
+body {
+  padding-bottom: 100px;
+  min-height: 100vh;
+}
+
+/* Add your own custom styles below */
+
+/* Global styles */
+body {
+  font-family: 'Roboto', Arial, sans-serif;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-}
-
-body {
-  font-family: 'Arial', sans-serif;
-  line-height: 1.6;
+  background-color: #f5f5f5;
   color: #333;
-  background-color: #f9f9f9;
 }
 
-a {
-  text-decoration: none;
-  color: #4a6bff;
+/* Common utility classes */
+.text-center {
+  text-align: center;
 }
 
-a:hover {
-  text-decoration: underline;
+.text-right {
+  text-align: right;
 }
 
-button {
+.w-100 {
+  width: 100%;
+}
+
+.mt-2 {
+  margin-top: 1rem;
+}
+
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.p-3 {
+  padding: 1.5rem;
+}
+
+/* Common button styles */
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: none;
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-img {
-  max-width: 100%;
+.btn-primary {
+  background-color: #3f51b5;
+  color: white;
 }
 
-/* Utility Classes */
+.btn-primary:hover {
+  background-color: #303f9f;
+}
+
+.btn-secondary {
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #ddd;
+}
+
+.btn-secondary:hover {
+  background-color: #e0e0e0;
+}
+
+.btn-danger {
+  background-color: #f44336;
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #d32f2f;
+}
+
+/* Card styles */
+.card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.card-body {
+  padding: 16px;
+}
+
+.card-footer {
+  padding: 16px;
+  border-top: 1px solid #eee;
+}
+
+/* Form styles */
+input, select, textarea {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: border-color 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  border-color: #3f51b5;
+  box-shadow: 0 0 0 2px rgba(63,81,181,0.25);
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #666;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+/* Responsive grid */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-.text-center {
-  text-align: center;
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px;
 }
 
-.mt-2 {
-  margin-top: 2rem;
+.col {
+  flex: 1;
+  padding: 0 10px;
 }
 
-.mb-2 {
-  margin-bottom: 2rem;
-}
+/* Responsive breakpoints */
+@media (max-width: 768px) {
+  .row {
+    flex-direction: column;
+  }
 
-/* For accessibility */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
+  .col {
+    width: 100%;
+    margin-bottom: 20px;
+  }
 }

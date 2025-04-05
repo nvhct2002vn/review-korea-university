@@ -1,35 +1,221 @@
 <div class="home-container">
-  <header class="banner">
-    <h1>{{ title }}</h1>
-    <p class="tagline">Discover the best universities in South Korea</p>
-  </header>
-
-  <section class="intro">
-    <div class="intro-content">
-      <h2>Find Your Perfect University in Korea</h2>
-      <p>Browse our comprehensive database of Korean universities, read authentic reviews from students, and make informed decisions about your education journey.</p>
-      <div class="cta-buttons">
-        <a routerLink="/universities" class="btn btn-primary">Browse Universities</a>
-        <a routerLink="/reviews" class="btn btn-secondary">Read Reviews</a>
+  <!-- Hero section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>Korean Universities Review</h1>
+      <p class="hero-description">
+        Explore, compare, and find the perfect university in South Korea.
+        Real insights from students to help you make informed decisions.
+      </p>
+      <div class="hero-actions">
+        <a routerLink="/universities" class="btn primary">Explore Universities</a>
+        <a routerLink="/request" class="btn">Request a University</a>
       </div>
     </div>
-    <div class="intro-image">
-      <img src="assets/images/korean-university.jpg" alt="Korean University Campus" />
+  </section>
+
+  <!-- Top Ranked Universities Section -->
+  <section class="top-ranked-section">
+    <h2>Top Ranked Universities</h2>
+    <p>Discover the highest-ranked universities in South Korea</p>
+
+    <!-- Loading state -->
+    <div *ngIf="isLoadingTopRanked" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading top universities...</p>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="topRankedError && !isLoadingTopRanked" class="error-container">
+      <p class="error-message">Failed to load top universities</p>
+      <button (click)="retryTopRanked()" class="btn">Try Again</button>
+    </div>
+
+    <!-- Universities grid -->
+    <div *ngIf="!isLoadingTopRanked && !topRankedError" class="universities-grid">
+      <div *ngIf="topRankedUniversities.length === 0" class="no-results">
+        <p>No top-ranked universities found</p>
+      </div>
+
+      <div *ngFor="let university of topRankedUniversities; let i = index" class="university-card">
+        <div class="card-header">
+          <img
+            [src]="university.imageUrl || 'https://mcdonnell.wustl.edu/wp-content/uploads/2020/10/SNU.jpg'"
+            [alt]="university.name"
+            class="university-image">
+          <div class="ranking-badge">#{{ i + 1 }}</div>
+        </div>
+        <div class="card-content">
+          <h3>{{ university.name }}</h3>
+          <p class="university-korean-name">{{ university.nameKorean || '--' }}</p>
+          <div class="university-meta">
+            <span class="location">{{ university.location || 'Unknown' }}</span>
+            <span class="type">{{ university.type || 'Unknown' }}</span>
+          </div>
+          <p class="university-description">
+            {{ ((university.description | slice:0:100) + (university.description && university.description.length > 100 ? '...' : '')) || 'No description available' }}
+          </p>
+          <a [routerLink]="['/universities', university.id]" class="view-btn">View Details</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-footer">
+      <a routerLink="/universities" class="btn-link">View All Universities</a>
     </div>
   </section>
 
-  <section class="features">
-    <div class="feature-card">
-      <h3>Top Universities</h3>
-      <p>Explore the highest-ranked universities in South Korea based on academic excellence, research, and student satisfaction.</p>
+  <!-- Top Rated Universities Section -->
+  <section class="top-rated-section">
+    <h2>Top Rated Universities</h2>
+    <p>Universities with the highest ratings from students</p>
+
+    <!-- Loading state -->
+    <div *ngIf="isLoadingTopRated" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading top-rated universities...</p>
     </div>
-    <div class="feature-card">
-      <h3>Student Reviews</h3>
-      <p>Read authentic reviews from current and former students about their university experiences.</p>
+
+    <!-- Error state -->
+    <div *ngIf="topRatedError && !isLoadingTopRated" class="error-container">
+      <p class="error-message">Failed to load top-rated universities</p>
+      <button (click)="retryTopRated()" class="btn">Try Again</button>
     </div>
-    <div class="feature-card">
-      <h3>Campus Life</h3>
-      <p>Get insights into campus facilities, accommodations, clubs, and cultural activities at Korean universities.</p>
+
+    <!-- Universities grid -->
+    <div *ngIf="!isLoadingTopRated && !topRatedError" class="universities-grid">
+      <div *ngIf="topRatedUniversities.length === 0" class="no-results">
+        <p>No top-rated universities found</p>
+      </div>
+
+      <div *ngFor="let university of topRatedUniversities" class="university-card">
+        <div class="card-header">
+          <img
+            [src]="university.imageUrl || 'https://mcdonnell.wustl.edu/wp-content/uploads/2020/10/SNU.jpg'"
+            [alt]="university.name"
+            class="university-image">
+          <div class="rating-badge">
+            <div class="stars">
+              <span *ngFor="let star of getStarsArray(university.averageRating || 0)">
+                <span *ngIf="star === 1" class="filled">★</span>
+                <span *ngIf="star === 0.5" class="filled">★</span>
+                <span *ngIf="star === 0">☆</span>
+              </span>
+            </div>
+            {{ university.averageRating?.toFixed(1) || '0.0' }}
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ university.name }}</h3>
+          <p class="university-korean-name">{{ university.nameKorean || '--' }}</p>
+          <div class="university-meta">
+            <span class="location">{{ university.location || 'Unknown' }}</span>
+            <span class="type">{{ university.type || 'Unknown' }}</span>
+          </div>
+          <p class="university-description">
+            {{ ((university.description | slice:0:100) + (university.description && university.description.length > 100 ? '...' : '')) || 'No description available' }}
+          </p>
+          <a [routerLink]="['/universities', university.id]" class="view-btn">View Details</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-footer">
+      <a routerLink="/universities" [queryParams]="{sort: 'rating'}" class="btn-link">View All Top-Rated</a>
     </div>
   </section>
-</div> 
+
+  <!-- Most Reviewed Universities Section -->
+  <section class="most-reviewed-section">
+    <h2>Most Reviewed Universities</h2>
+    <p>Universities with the most student reviews and experiences</p>
+
+    <!-- Loading state -->
+    <div *ngIf="isLoadingMostReviewed" class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Loading most reviewed universities...</p>
+    </div>
+
+    <!-- Error state -->
+    <div *ngIf="mostReviewedError && !isLoadingMostReviewed" class="error-container">
+      <p class="error-message">Failed to load most reviewed universities</p>
+      <button (click)="retryMostReviewed()" class="btn">Try Again</button>
+    </div>
+
+    <!-- Universities grid -->
+    <div *ngIf="!isLoadingMostReviewed && !mostReviewedError" class="universities-grid">
+      <div *ngIf="mostReviewedUniversities.length === 0" class="no-results">
+        <p>No reviewed universities found</p>
+      </div>
+
+      <div *ngFor="let university of mostReviewedUniversities" class="university-card">
+        <div class="card-header">
+          <img
+            [src]="university.imageUrl || 'https://mcdonnell.wustl.edu/wp-content/uploads/2020/10/SNU.jpg'"
+            [alt]="university.name"
+            class="university-image">
+          <div class="rating-badge">
+            {{ university.reviewCount || 0 }} Reviews
+          </div>
+        </div>
+        <div class="card-content">
+          <h3>{{ university.name }}</h3>
+          <p class="university-korean-name">{{ university.nameKorean || '--' }}</p>
+          <div class="university-meta">
+            <span class="location">{{ university.location || 'Unknown' }}</span>
+            <span class="type">{{ university.type || 'Unknown' }}</span>
+          </div>
+          <p class="university-description">
+            {{ ((university.description | slice:0:100) + (university.description && university.description.length > 100 ? '...' : '')) || 'No description available' }}
+          </p>
+          <a [routerLink]="['/universities', university.id]" class="view-btn">View Details</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-footer">
+      <a routerLink="/universities" [queryParams]="{sort: 'reviews'}" class="btn-link">View All Most Reviewed</a>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features-section">
+    <h2>Why Choose Korean Universities Review</h2>
+
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">📚</div>
+        <h3>Comprehensive Database</h3>
+        <p>Detailed information on over 100 universities across South Korea, updated regularly.</p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">⭐</div>
+        <h3>Real Student Reviews</h3>
+        <p>Authentic insights from current and former students to help you make informed decisions.</p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">🔍</div>
+        <h3>Easy Comparison</h3>
+        <p>Compare universities side by side based on rankings, reviews, programs, and more.</p>
+      </div>
+
+      <div class="feature-item">
+        <div class="feature-icon">💬</div>
+        <h3>Share Your Experience</h3>
+        <p>Contribute your own review and help future students find their perfect university match.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Call to Action Section -->
+  <section class="cta-section">
+    <h2>Ready to Find Your Perfect University?</h2>
+    <p>Start exploring universities in South Korea and take the first step toward your academic future.</p>
+    <div class="cta-buttons">
+      <a routerLink="/universities" class="btn primary">Explore Universities</a>
+      <a routerLink="/request" class="btn">Request a University</a>
+    </div>
+  </section>
+</div>

@@ -1,303 +1,357 @@
-<div class="university-detail-container" *ngIf="university">
-  <div class="university-header">
-    <a routerLink="/universities" class="back-link">« Back to Universities</a>
-    <h1>{{ university.name }}</h1>
-    <h2 class="korean-name">{{ university.nameKorean }}</h2>
-    
-    <div class="university-meta">
-      <div class="meta-item">
-        <span class="meta-label">Location:</span>
-        <span class="meta-value">{{ university.location }}</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Type:</span>
-        <span class="meta-value">{{ university.type }}</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Established:</span>
-        <span class="meta-value">{{ university.established }}</span>
-      </div>
-      <div class="meta-item">
-        <span class="meta-label">Website:</span>
-        <a [href]="university.website" target="_blank" class="meta-value website-link">{{ university.website }}</a>
-      </div>
-      <div class="meta-item">
-        <div class="rating-display">
-          <span class="rating-value">{{ university.averageRating }}</span>
-          <div class="stars">
-            <span class="star filled" *ngFor="let star of getStarsArray(university.averageRating || 0)">★</span>
-            <span class="star" *ngFor="let star of getEmptyStarsArray(university.averageRating || 0)">★</span>
-          </div>
-        </div>
+<div class="university-detail-container">
+  <!-- Loading state -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>Loading university details...</p>
+  </div>
+
+  <!-- Error message -->
+  <div class="error-container" *ngIf="errorMessage">
+    <div class="error-message">
+      <div class="error-icon">⚠️</div>
+      <h2>We encountered a problem</h2>
+      <p>{{ errorMessage }}</p>
+      <div class="error-actions">
+        <button (click)="retry()">Try Again</button>
+        <a routerLink="/universities" class="back-to-list">Back to Universities List</a>
       </div>
     </div>
   </div>
-  
-  <div class="image-gallery">
-    <div class="image-wrapper">
-      <img [src]="university.images[currentImageIndex]" alt="{{ university.name }}" class="university-image" onerror="this.src='assets/images/university-placeholder.jpg'">
-      
-      <div class="image-controls" *ngIf="university.images.length > 1">
-        <button class="control prev" (click)="prevImage()">❮</button>
-        <button class="control next" (click)="nextImage()">❯</button>
-      </div>
-      <div class="image-indicator" *ngIf="university.images.length > 1">
-        {{ currentImageIndex + 1 }} / {{ university.images.length }}
-      </div>
-    </div>
-  </div>
-  
-  <div class="tabs">
-    <button 
-      class="tab-button" 
-      [class.active]="activeTab === 'overview'" 
-      (click)="setActiveTab('overview')"
-    >
-      Overview
-    </button>
-    <button 
-      class="tab-button" 
-      [class.active]="activeTab === 'reviews'" 
-      (click)="setActiveTab('reviews')"
-    >
-      Reviews ({{ reviews.length }})
-    </button>
-    <button 
-      class="tab-button" 
-      [class.active]="activeTab === 'admissions'" 
-      (click)="setActiveTab('admissions')"
-    >
-      Admissions
-    </button>
-    <button 
-      class="tab-button" 
-      [class.active]="activeTab === 'facilities'" 
-      (click)="setActiveTab('facilities')"
-    >
-      Facilities
-    </button>
-  </div>
-  
-  <div class="tab-content">
-    <!-- Overview Tab -->
-    <div class="tab-pane" *ngIf="activeTab === 'overview'">
-      <div class="university-description">
-        <h3>About {{ university.name }}</h3>
-        <p>{{ university.description }}</p>
-      </div>
-      
-      <div class="university-stats">
-        <div class="stat-card">
-          <h4>Ranking</h4>
-          <div class="stat-value">{{ university.ranking ? '#' + university.ranking : 'N/A' }}</div>
-          <div class="stat-desc">in South Korea</div>
+
+  <!-- University details content -->
+  <div class="university-content" *ngIf="university && !isLoading && !errorMessage">
+    <div class="university-header">
+      <a routerLink="/universities" class="back-link">« Back to Universities</a>
+      <h1>{{ university.name }}</h1>
+      <h2 class="korean-name" *ngIf="university.nameKorean">{{ university.nameKorean }}</h2>
+
+      <div class="university-meta">
+        <div class="meta-item" *ngIf="university.location">
+          <span class="meta-label">Location:</span>
+          <span class="meta-value">{{ university.location }}</span>
         </div>
-        <div class="stat-card">
-          <h4>Students</h4>
-          <div class="stat-value">{{ university.studentCount?.toLocaleString() || 'N/A' }}</div>
-          <div class="stat-desc">total enrollment</div>
+        <div class="meta-item" *ngIf="university.type">
+          <span class="meta-label">Type:</span>
+          <span class="meta-value">{{ university.type }}</span>
         </div>
-        <div class="stat-card">
-          <h4>Faculty</h4>
-          <div class="stat-value">{{ university.facultyCount?.toLocaleString() || 'N/A' }}</div>
-          <div class="stat-desc">academic staff</div>
+        <div class="meta-item" *ngIf="university.established">
+          <span class="meta-label">Established:</span>
+          <span class="meta-value">{{ university.established }}</span>
         </div>
-        <div class="stat-card">
-          <h4>International</h4>
-          <div class="stat-value">{{ university.hasInternationalPrograms ? 'Yes' : 'No' }}</div>
-          <div class="stat-desc">programs available</div>
+        <div class="meta-item" *ngIf="university.website">
+          <span class="meta-label">Website:</span>
+          <a [href]="university.website" target="_blank" class="meta-value website-link">{{ university.website }}</a>
         </div>
-      </div>
-      
-      <div class="departments">
-        <h3>Departments & Programs</h3>
-        <div class="department-list">
-          <div class="department-item" *ngFor="let department of university.departments">
-            {{ department }}
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Reviews Tab -->
-    <div class="tab-pane" *ngIf="activeTab === 'reviews'">
-      <div class="reviews-header">
-        <h3>Student Reviews</h3>
-        <button class="add-review-btn" (click)="toggleReviewForm()">
-          {{ showReviewForm ? 'Cancel' : 'Write a Review' }}
-        </button>
-      </div>
-      
-      <!-- Review Form -->
-      <div class="review-form-container" *ngIf="showReviewForm">
-        <h4>Share Your Experience</h4>
-        <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
-          <div class="form-group">
-            <label for="author">Your Name</label>
-            <input type="text" id="author" formControlName="author">
-            <div class="error-message" *ngIf="reviewForm.get('author')?.invalid && reviewForm.get('author')?.touched">
-              Name is required
+        <div class="meta-item" *ngIf="university.averageRating">
+          <div class="rating-display">
+            <span class="rating-value">{{ university.averageRating }}</span>
+            <div class="stars">
+              <span class="star filled" *ngFor="let star of getStarsArray(university.averageRating || 0)">★</span>
+              <span class="star" *ngFor="let star of getEmptyStarsArray(university.averageRating || 0)">★</span>
             </div>
           </div>
-          
-          <div class="form-group">
-            <label for="rating">Rating</label>
-            <select id="rating" formControlName="rating">
-              <option value="5">5 - Excellent</option>
-              <option value="4">4 - Very Good</option>
-              <option value="3">3 - Good</option>
-              <option value="2">2 - Fair</option>
-              <option value="1">1 - Poor</option>
-            </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Gallery Section -->
+    <div class="image-gallery" *ngIf="gallery && gallery.length > 0">
+      <div class="image-wrapper">
+        <img
+          [src]="currentImage"
+          alt="{{ university.name || 'University' }}"
+          class="university-image"
+        >
+
+        <div class="image-controls" *ngIf="gallery.length > 1">
+          <button class="control prev" (click)="prevImage()">❮</button>
+          <button class="control next" (click)="nextImage()">❯</button>
+        </div>
+        <div class="image-indicator" *ngIf="gallery.length > 1">
+          {{ gallery.indexOf(currentImage) + 1 }} / {{ gallery.length }}
+        </div>
+      </div>
+    </div>
+
+    <div class="tabs">
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'overview'"
+        (click)="setActiveTab('overview')"
+      >
+        Overview
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'reviews'"
+        (click)="setActiveTab('reviews')"
+      >
+        Reviews ({{ reviews.length }})
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'admissions'"
+        (click)="setActiveTab('admissions')"
+      >
+        Admissions
+      </button>
+      <button
+        class="tab-button"
+        [class.active]="activeTab === 'facilities'"
+        (click)="setActiveTab('facilities')"
+      >
+        Facilities
+      </button>
+    </div>
+
+    <div class="tab-content">
+      <!-- Overview Tab -->
+      <div class="tab-pane" *ngIf="activeTab === 'overview'">
+        <div class="university-description">
+          <h3>About {{ university.name }}</h3>
+          <p>{{ university.description }}</p>
+        </div>
+
+        <div class="university-stats">
+          <div class="stat-card">
+            <h4>Ranking</h4>
+            <div class="stat-value">{{ university.ranking ? '#' + university.ranking : 'N/A' }}</div>
+            <div class="stat-desc">in South Korea</div>
           </div>
-          
-          <div class="form-group">
-            <label for="content">Your Review</label>
-            <textarea id="content" formControlName="content" rows="5"></textarea>
-            <div class="error-message" *ngIf="reviewForm.get('content')?.invalid && reviewForm.get('content')?.touched">
-              Review must be at least 50 characters
+          <div class="stat-card">
+            <h4>Students</h4>
+            <div class="stat-value">{{ university.studentCount?.toLocaleString() || 'N/A' }}</div>
+            <div class="stat-desc">total enrollment</div>
+          </div>
+          <div class="stat-card">
+            <h4>Faculty</h4>
+            <div class="stat-value">{{ university.facultyCount?.toLocaleString() || 'N/A' }}</div>
+            <div class="stat-desc">academic staff</div>
+          </div>
+          <div class="stat-card">
+            <h4>International</h4>
+            <div class="stat-value">{{ university.hasInternationalPrograms ? 'Yes' : 'No' }}</div>
+            <div class="stat-desc">programs available</div>
+          </div>
+        </div>
+
+        <div class="departments">
+          <h3>Departments & Programs</h3>
+          <div class="department-list">
+            <div class="department-item" *ngFor="let department of university.departments">
+              {{ department }}
             </div>
           </div>
-          
-          <div class="form-row">
+        </div>
+      </div>
+
+      <!-- Reviews Tab -->
+      <div class="tab-pane" *ngIf="activeTab === 'reviews'">
+        <div class="reviews-header">
+          <h3>Student Reviews</h3>
+          <button class="add-review-btn" (click)="toggleReviewForm()">
+            {{ showReviewForm ? 'Cancel' : 'Write a Review' }}
+          </button>
+        </div>
+
+        <!-- Review Form -->
+        <div class="review-form-container" *ngIf="showReviewForm">
+          <h4>Share Your Experience</h4>
+
+          <!-- Success message after form submission -->
+          <div class="success-message" *ngIf="submitSuccess">
+            <p>Thank you for your review! It has been successfully added.</p>
+          </div>
+
+          <!-- Submit error message -->
+          <div class="error-message" *ngIf="submitErrorMessage">
+            <p>{{ submitErrorMessage }}</p>
+          </div>
+
+          <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
             <div class="form-group">
-              <label for="programStudied">Program/Major</label>
-              <input type="text" id="programStudied" formControlName="programStudied">
+              <label for="author">Your Name</label>
+              <input type="text" id="author" formControlName="author">
+              <div class="error-message" *ngIf="reviewForm.get('author')?.invalid && reviewForm.get('author')?.touched">
+                Name is required
+              </div>
             </div>
-            
+
             <div class="form-group">
-              <label for="yearOfStudy">Year(s) of Study</label>
-              <input type="text" id="yearOfStudy" formControlName="yearOfStudy" placeholder="e.g., 2020-2024">
+              <label for="rating">Rating</label>
+              <select id="rating" formControlName="rating">
+                <option value="5">5 - Excellent</option>
+                <option value="4">4 - Very Good</option>
+                <option value="3">3 - Good</option>
+                <option value="2">2 - Fair</option>
+                <option value="1">1 - Poor</option>
+              </select>
             </div>
-          </div>
-          
-          <div class="form-group checkbox-group">
-            <input type="checkbox" id="isInternational" formControlName="isInternational">
-            <label for="isInternational">I am/was an international student</label>
-          </div>
-          
-          <div class="form-group">
-            <label for="pros">Pros (comma-separated)</label>
-            <input type="text" id="pros" formControlName="pros" placeholder="e.g., Great professors, Beautiful campus">
-          </div>
-          
-          <div class="form-group">
-            <label for="cons">Cons (comma-separated)</label>
-            <input type="text" id="cons" formControlName="cons" placeholder="e.g., Expensive tuition, Limited housing">
-          </div>
-          
-          <button type="submit" class="submit-btn" [disabled]="reviewForm.invalid">Submit Review</button>
-        </form>
-      </div>
-      
-      <!-- Reviews List -->
-      <div class="reviews-list" *ngIf="reviews.length > 0">
-        <div class="review-card" *ngFor="let review of reviews">
-          <div class="review-header">
-            <div class="reviewer-info">
-              <div class="reviewer-name">{{ review.author }}</div>
-              <div class="program-info" *ngIf="review.programStudied">
-                {{ review.programStudied }}
-                <span *ngIf="review.yearOfStudy">({{ review.yearOfStudy }})</span>
+
+            <div class="form-group">
+              <label for="content">Your Review</label>
+              <textarea id="content" formControlName="content" rows="5"></textarea>
+              <div class="error-message" *ngIf="reviewForm.get('content')?.invalid && reviewForm.get('content')?.touched">
+                Review must be at least 50 characters
               </div>
-              <div class="international-badge" *ngIf="review.isInternational">International Student</div>
             </div>
-            <div class="review-rating">
-              <div class="stars">
-                <span class="star filled" *ngFor="let star of getStarsArray(review.rating)">★</span>
-                <span class="star" *ngFor="let star of getEmptyStarsArray(review.rating)">★</span>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="programStudied">Program/Major</label>
+                <input type="text" id="programStudied" formControlName="programStudied">
               </div>
-              <div class="review-date">{{ review.date | date:'mediumDate' }}</div>
+
+              <div class="form-group">
+                <label for="yearOfStudy">Year(s) of Study</label>
+                <input type="text" id="yearOfStudy" formControlName="yearOfStudy" placeholder="e.g., 2020-2024">
+              </div>
             </div>
-          </div>
-          
-          <div class="review-content">
-            <p>{{ review.content }}</p>
-          </div>
-          
-          <div class="review-pros-cons" *ngIf="review.pros?.length || review.cons?.length">
-            <div class="pros" *ngIf="review.pros?.length">
-              <h5>Pros</h5>
-              <ul>
-                <li *ngFor="let pro of review.pros">{{ pro }}</li>
-              </ul>
+
+            <div class="form-group checkbox-group">
+              <input type="checkbox" id="isInternational" formControlName="isInternational">
+              <label for="isInternational">I am/was an international student</label>
             </div>
-            <div class="cons" *ngIf="review.cons?.length">
-              <h5>Cons</h5>
-              <ul>
-                <li *ngFor="let con of review.cons">{{ con }}</li>
-              </ul>
+
+            <div class="form-group">
+              <label for="pros">Pros (comma-separated)</label>
+              <input type="text" id="pros" formControlName="pros" placeholder="e.g., Great professors, Beautiful campus">
+            </div>
+
+            <div class="form-group">
+              <label for="cons">Cons (comma-separated)</label>
+              <input type="text" id="cons" formControlName="cons" placeholder="e.g., Expensive tuition, Limited housing">
+            </div>
+
+            <button type="submit" class="submit-btn" [disabled]="reviewForm.invalid || isSubmittingReview">
+              <span *ngIf="!isSubmittingReview">Submit Review</span>
+              <span *ngIf="isSubmittingReview">Submitting...</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Reviews loading state -->
+        <div class="loading-state" *ngIf="isLoadingReviews">
+          <div class="spinner"></div>
+          <p>Loading reviews...</p>
+        </div>
+
+        <!-- Reviews error message -->
+        <div class="error-message" *ngIf="reviewsErrorMessage">
+          <p>{{ reviewsErrorMessage }}</p>
+          <button (click)="loadReviews(university.id)">Try Again</button>
+        </div>
+
+        <!-- Reviews List -->
+        <div class="reviews-list" *ngIf="reviews.length > 0 && !isLoadingReviews && !reviewsErrorMessage">
+          <div class="review-card" *ngFor="let review of reviews">
+            <div class="review-header">
+              <div class="reviewer-info">
+                <div class="reviewer-name">{{ review.author }}</div>
+                <div class="program-info" *ngIf="review.programStudied">
+                  {{ review.programStudied }}
+                  <span *ngIf="review.yearOfStudy">({{ review.yearOfStudy }})</span>
+                </div>
+                <div class="international-badge" *ngIf="review.isInternational">International Student</div>
+              </div>
+              <div class="review-rating">
+                <div class="stars">
+                  <span class="star filled" *ngFor="let star of getStarsArray(review.rating)">★</span>
+                  <span class="star half-filled" *ngIf="review.rating % 1 >= 0.5">★</span>
+                  <span class="star" *ngFor="let star of getEmptyStarsArray(review.rating)">★</span>
+                </div>
+                <div class="review-date">{{ review.date | date:'mediumDate' }}</div>
+              </div>
+            </div>
+
+            <div class="review-content">
+              <p>{{ review.content }}</p>
+            </div>
+
+            <div class="review-pros-cons" *ngIf="review.pros?.length || review.cons?.length">
+              <div class="pros" *ngIf="review.pros?.length">
+                <h5>Pros</h5>
+                <ul>
+                  <li *ngFor="let pro of review.pros">{{ pro }}</li>
+                </ul>
+              </div>
+              <div class="cons" *ngIf="review.cons?.length">
+                <h5>Cons</h5>
+                <ul>
+                  <li *ngFor="let con of review.cons">{{ con }}</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
+
+        <div class="no-reviews" *ngIf="reviews.length === 0 && !isLoadingReviews && !reviewsErrorMessage">
+          <p>There are no reviews yet for this university.</p>
+          <button class="add-review-btn" (click)="toggleReviewForm()">Be the First to Review</button>
+        </div>
       </div>
-      
-      <div class="no-reviews" *ngIf="reviews.length === 0">
-        <p>There are no reviews yet for this university.</p>
-        <button class="add-review-btn" (click)="toggleReviewForm()">Be the First to Review</button>
-      </div>
-    </div>
-    
-    <!-- Admissions Tab -->
-    <div class="tab-pane" *ngIf="activeTab === 'admissions'">
-      <div class="admissions-info">
-        <h3>Admission Requirements</h3>
-        <p>{{ university.admissionRequirements || 'Information not available' }}</p>
-        
-        <h3>Tuition & Fees</h3>
+
+      <!-- Admissions Tab -->
+      <div class="tab-pane" *ngIf="activeTab === 'admissions'">
+        <div class="admissions-info">
+          <h3>Admission Requirements</h3>
+          <p *ngIf="university.admissionRequirements">{{ university.admissionRequirements }}</p>
+          <p *ngIf="!university.admissionRequirements">No admission requirements information available.</p>
+        </div>
+
         <div class="tuition-info" *ngIf="university.tuitionFees">
+          <h3>Tuition & Fees</h3>
+
           <div class="tuition-table">
             <table>
               <thead>
                 <tr>
-                  <th></th>
+                  <th>Program Level</th>
                   <th>Domestic Students</th>
                   <th>International Students</th>
                 </tr>
               </thead>
               <tbody>
                 <tr *ngIf="university.tuitionFees.undergraduate">
-                  <td><strong>Undergraduate</strong></td>
+                  <td>Undergraduate</td>
                   <td>{{ formatCurrency(university.tuitionFees.undergraduate.domestic, university.tuitionFees.currency) }}</td>
                   <td>{{ formatCurrency(university.tuitionFees.undergraduate.international, university.tuitionFees.currency) }}</td>
                 </tr>
                 <tr *ngIf="university.tuitionFees.graduate">
-                  <td><strong>Graduate</strong></td>
+                  <td>Graduate</td>
                   <td>{{ formatCurrency(university.tuitionFees.graduate.domestic, university.tuitionFees.currency) }}</td>
                   <td>{{ formatCurrency(university.tuitionFees.graduate.international, university.tuitionFees.currency) }}</td>
                 </tr>
               </tbody>
             </table>
-            <div class="tuition-note">
-              <p>*Tuition fees are per semester and subject to change.</p>
-            </div>
+          </div>
+
+          <div class="tuition-note">
+            <p>Note: Fees are per semester and may vary by department. Additional fees may apply for specific programs.</p>
           </div>
         </div>
+
         <div class="tuition-unavailable" *ngIf="!university.tuitionFees">
-          <p>Tuition information is not available.</p>
+          <p>Tuition information is not available for this university.</p>
         </div>
       </div>
-    </div>
-    
-    <!-- Facilities Tab -->
-    <div class="tab-pane" *ngIf="activeTab === 'facilities'">
-      <div class="facilities-info">
-        <h3>Campus Facilities</h3>
-        
-        <div class="facilities-list" *ngIf="university.campusFacilities?.length">
-          <div class="facility-item" *ngFor="let facility of university.campusFacilities">
-            {{ facility }}
+
+      <!-- Facilities Tab -->
+      <div class="tab-pane" *ngIf="activeTab === 'facilities'">
+        <div class="facilities-info">
+          <h3>Campus Facilities</h3>
+
+          <div class="facilities-list" *ngIf="university.campusFacilities && university.campusFacilities.length > 0">
+            <div class="facility-item" *ngFor="let facility of university.campusFacilities">
+              {{ facility }}
+            </div>
           </div>
-        </div>
-        
-        <div class="facilities-unavailable" *ngIf="!university.campusFacilities?.length">
-          <p>Facilities information is not available.</p>
+
+          <div class="facilities-unavailable" *ngIf="!university.campusFacilities || university.campusFacilities.length === 0">
+            <p>Facility information is not available for this university.</p>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
-
-<div class="loading" *ngIf="!university">
-  <p>Loading university information...</p>
 </div>

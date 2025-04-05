@@ -16,11 +16,13 @@ export interface University {
   facultyCount?: number;              // Số lượng giảng viên (tùy chọn)
   hasInternationalPrograms: boolean;  // Có chương trình quốc tế hay không
   images: string[];                   // Mảng đường dẫn đến hình ảnh của trường
+  imageUrl?: string;                  // URL cho hình ảnh chính của trường (tùy chọn)
   departments: string[];              // Mảng tên các khoa/ngành học
   admissionRequirements?: string;     // Yêu cầu tuyển sinh (tùy chọn)
   tuitionFees?: TuitionFees;          // Thông tin học phí (tùy chọn, sử dụng interface TuitionFees)
   campusFacilities?: string[];        // Mảng các cơ sở vật chất trong khuôn viên (tùy chọn)
   averageRating?: number;             // Điểm đánh giá trung bình (tùy chọn)
+  reviewCount?: number;               // Số lượng đánh giá (tùy chọn)
 }
 
 /**
@@ -72,5 +74,5 @@ export interface UniversityRequest {
   requesterEmail: string;             // Email của người yêu cầu để có thể liên hệ
   additionalInfo?: string;            // Thông tin bổ sung (tùy chọn)
   status?: 'pending' | 'approved' | 'rejected'; // Trạng thái của yêu cầu (sẽ được xử lý bởi backend)
-  submittedDate?: Date;               // Ngày gửi yêu cầu (sẽ được tạo bởi backend)
+  submissionDate?: Date;              // Ngày gửi yêu cầu (sẽ được tạo bởi backend)
 } 
