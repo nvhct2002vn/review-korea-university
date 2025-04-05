@@ -1,0 +1,112 @@
+<!-- Container chính cho trang danh sách trường đại học -->
+<div class="university-list-container">
+  <!-- Tiêu đề chính của trang -->
+  <h1>Universities in South Korea</h1>
+  
+  <!-- Phần bộ lọc và tìm kiếm -->
+  <div class="filters">
+    <!-- Ô tìm kiếm -->
+    <div class="search-box">
+      <!-- 
+        #searchInput: Template reference variable để truy cập element này trong code
+        (input): Event binding - khi người dùng nhập, gọi phương thức onSearchChange với giá trị đã nhập
+      -->
+      <input 
+        type="text" 
+        placeholder="Search universities..." 
+        #searchInput
+        (input)="onSearchChange(searchInput.value)"
+      >
+    </div>
+    
+    <!-- Nhóm các bộ lọc dropdown -->
+    <div class="filter-group">
+      <!-- Dropdown lọc theo địa điểm -->
+      <select #locationSelect (change)="onLocationFilterChange(locationSelect.value)">
+        <option value="">All Locations</option>
+        <!-- 
+          @for: Cú pháp vòng lặp trong Angular
+          track: Giúp Angular theo dõi và tối ưu hóa hiệu suất khi danh sách thay đổi
+          getUniqueLocations(): Phương thức từ component trả về danh sách các địa điểm duy nhất
+        -->
+        @for (location of getUniqueLocations(); track location) {
+          <option [value]="location">{{ location }}</option>
+        }
+      </select>
+      
+      <!-- Dropdown lọc theo loại trường -->
+      <select #typeSelect (change)="onTypeFilterChange(typeSelect.value)">
+        <option value="">All Types</option>
+        @for (type of getUniqueTypes(); track type) {
+          <option [value]="type">{{ type }}</option>
+        }
+      </select>
+      
+      <!-- Nút đặt lại các bộ lọc -->
+      <button class="reset-button" (click)="resetFilters()">Reset Filters</button>
+    </div>
+  </div>
+  
+  <!-- Lưới hiển thị danh sách các trường đại học -->
+  <div class="university-grid">
+    <!-- Vòng lặp qua mảng filteredUniversities để hiển thị từng trường đại học -->
+    @for (university of filteredUniversities; track university.id) {
+      <!-- Card hiển thị thông tin của một trường đại học -->
+      <div class="university-card">
+        <!-- 
+          Hình ảnh của trường 
+          [src]: Property binding - gán giá trị động cho thuộc tính src
+          onerror: Nếu không tải được hình, hiển thị hình mặc định
+        -->
+        <img [src]="university.images[0]" alt="{{ university.name }}" class="university-image" onerror="this.src='assets/images/university-placeholder.jpg'">
+        
+        <!-- Phần thông tin chi tiết của trường -->
+        <div class="university-info">
+          <!-- Tên trường bằng tiếng Anh -->
+          <h2>{{ university.name }}</h2>
+          
+          <!-- Tên trường bằng tiếng Hàn -->
+          <h3 class="korean-name">{{ university.nameKorean }}</h3>
+          
+          <!-- Thông tin meta: địa điểm, loại, năm thành lập -->
+          <div class="university-meta">
+            <span class="location">{{ university.location }}</span>
+            <span class="type">{{ university.type }}</span>
+            <span class="established">Est. {{ university.established }}</span>
+          </div>
+          
+          <!-- Hiển thị đánh giá dưới dạng số và sao -->
+          <div class="university-rating">
+            <!-- Giá trị đánh giá dạng số -->
+            <span class="rating-value">{{ university.averageRating }}</span>
+            
+            <!-- Hiển thị đánh giá dưới dạng sao -->
+            <div class="rating-stars">
+              <!-- 
+                Vòng lặp qua 5 sao
+                [class.filled]: Class binding có điều kiện - thêm class 'filled' nếu điều kiện là true 
+              -->
+              @for (star of [1, 2, 3, 4, 5]; track star) {
+                <span class="star" [class.filled]="university.averageRating && star <= university.averageRating">★</span>
+              }
+            </div>
+          </div>
+          
+          <!-- Mô tả ngắn gọn về trường, giới hạn 150 ký tự với pipe slice -->
+          <p class="university-description">{{ university.description | slice:0:150 }}...</p>
+          
+          <!-- Liên kết đến trang chi tiết, sử dụng routerLink với tham số id -->
+          <a [routerLink]="['/universities', university.id]" class="view-details">View Details</a>
+        </div>
+      </div>
+    }
+    
+    <!-- Hiển thị thông báo khi không tìm thấy kết quả nào -->
+    @if (filteredUniversities.length === 0) {
+      <div class="no-results">
+        <p>No universities found matching your criteria.</p>
+        <button (click)="resetFilters()">Reset Filters</button>
+      </div>
+    }
+  </div>
+</div> 
